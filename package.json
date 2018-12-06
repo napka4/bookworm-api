@@ -18,7 +18,8 @@
     "eslint-plugin-prettier": "^2.2.0",
     "eslint-plugin-react": "^7.3.0",
     "nodemon": "^1.11.0",
-    "prettier": "^1.6.1"
+    "prettier": "^1.6.1",
+    "ws": "3.3.2"
   },
   "dependencies": {
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
