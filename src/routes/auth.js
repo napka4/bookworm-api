@@ -1,5 +1,7 @@
 import express from 'express';
 import User from '../models/User';
+import jwt from 'jsonwebtoken';
+import { sendResetPasswordEmail} from '../mailer';
 
 const router = express.Router();
 
@@ -17,6 +19,41 @@ router.post("/", (req,res) => {
             res.status(400).json({ errors: { global: "Mauvaise combinaison !"}})
         }
         });
+});
+
+router.post("/confirmation", (req, res) => {
+    const token = req.body.token;
+    User.findOneAndUpdate(
+      { confirmationToken: token },
+      { confirmationToken: "", confirmed: true },
+      { new: true }
+    ).then(
+      user =>
+        user ? res.json({ user: user.toAuthJSON() }) : res.status(400).json({})
+    );
+  });
+
+router.post("/reset_password_request", (req,res) => {
+  User.findOne({ email: req.body.email }).then(user => {
+    if (user) {
+      sendResetPasswordEmail(user);
+      res.json({});
+    } else {
+      res
+      .status(400)
+      .json({ errors: { global: "Aucun utilisateur n'est enregistré avec cet email"}});
+    }
+  })
+});
+
+router.post("/validate_token", (req,res) => {
+  jwt.verify(req.body.token, process.env.JWT_SECRET, err => {
+    if(err){
+      res.status(401).json({});
+    } else {
+      res.json({});
+    }
+  })
 });
 
 export default router;
