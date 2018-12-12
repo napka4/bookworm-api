@@ -56,4 +56,22 @@ router.post("/validate_token", (req,res) => {
   })
 });
 
+router.post("/reset_password", (res,req) => {
+  const { password, token } = req.body.data;
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      res.status(401).json({ errors: { global: "Mauvais token"}});
+    } else {
+      User.findOne({ _id: decoded._id}).then(user => {
+        if (user){
+        user.setPassword(password);
+        user.save().then(() => res.json({}));
+        } else {
+          res.status(404).json({ errors: { global: "Mauvais Token"} });
+        }
+      });
+    }
+  });
+});
+
 export default router;
