@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import uniqueValidator from "mongoose-unique-validator";
 
+// TODO: add uniqueness and email validations to email field
 const schema = new mongoose.Schema(
   {
     email: {
@@ -68,6 +69,6 @@ schema.methods.toAuthJSON = function toAuthJSON() {
   };
 };
 
-schema.plugin(uniqueValidator, { message: "Ce mail est déjà utilisé" });
+schema.plugin(uniqueValidator, { message: "This email is already taken" });
 
 export default mongoose.model("User", schema);
