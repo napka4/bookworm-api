@@ -19,7 +19,7 @@ mongoose.connect(process.env.MONGODB_URL, { useMongoClient: true });
 app.use("/api/auth", auth);
 app.use("/api/users", users);
 app.use("/api/books", books);
-app.use("api/lists", lists);
+app.use("/api/lists", lists);
 
 app.get("/*", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
