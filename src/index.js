@@ -8,6 +8,7 @@ import Promise from "bluebird";
 import auth from "./routes/auth";
 import users from "./routes/users";
 import books from "./routes/books";
+import lists from "./routes/lists";
 
 dotenv.config();
 const app = express();
@@ -18,6 +19,7 @@ mongoose.connect(process.env.MONGODB_URL, { useMongoClient: true });
 app.use("/api/auth", auth);
 app.use("/api/users", users);
 app.use("/api/books", books);
+app.use("api/lists", lists);
 
 app.get("/*", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
