@@ -18,6 +18,12 @@ router.post("/", (req, res) => {
     .catch(err => res.status(400).json({ errors: parseErrors(err.errors) }));
 });
 
+router.delete("/", (req, res) => {
+  Book.deleteOne({...req.body.book, userId: req.currentUser._id })
+  .then(book => res.json({book}) )
+    .catch(err => res.status(400).json({ errors: parseErrors(err.errors) }));
+});
+
 router.get("/search", (req, res) => {
   request
     .get(

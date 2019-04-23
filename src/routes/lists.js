@@ -17,6 +17,20 @@ router.post("/", (req, res) => {
     .catch(err => res.status(400).json({ errors: parseErrors(err.errors) }));
 });
 
+router.put("/", (req, res) => {
+  console.log(req.body)
+  List.useFindAndModify({ ...req.body.list, userId: req.currentUser._id, title: req.body.title })
+    .then(list => res.json({ list }))
+    .catch(err => res.status(400).json({ errors: parseErrors(err.errors) }));
+});
+
+router.delete("/", (req, res) => {
+  console.log(req.body)
+  List.deleteOne({...req.body.list, userId: req.currentUser._id})
+  .then(list => res.json({list}) )
+    .catch(err => res.status(400).json({ errors: parseErrors(err.errors) }));
+});
+
 //récup les données du formu
 
 //retrouver les listes
