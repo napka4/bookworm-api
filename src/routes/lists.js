@@ -11,23 +11,21 @@ router.get("/", (req, res) => {
 });
 
 router.post("/", (req, res) => {
-  console.log(req.body)
   List.create({ ...req.body.list, userId: req.currentUser._id, title: req.body.title })
     .then(list => res.json({ list }))
     .catch(err => res.status(400).json({ errors: parseErrors(err.errors) }));
 });
 
-router.put("/", (req, res) => {
-  console.log(req.body)
-  List.useFindAndModify({ ...req.body.list, userId: req.currentUser._id, title: req.body.title })
-    .then(list => res.json({ list }))
+router.put("/", (req, res) => 
+{
+  List.findOneAndUpdate({ _id: req.body._id }, {$set:{ title: req.body.title }}, {new: true})
+    .then(list => res.json({list}))
     .catch(err => res.status(400).json({ errors: parseErrors(err.errors) }));
 });
 
 router.delete("/", (req, res) => {
-  console.log(req.body)
   List.deleteOne({...req.body.list, userId: req.currentUser._id})
-  .then(list => res.json({list}) )
+  .then(list => res.json({list}))
     .catch(err => res.status(400).json({ errors: parseErrors(err.errors) }));
 });
 

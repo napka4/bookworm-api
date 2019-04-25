@@ -24,7 +24,7 @@ router.post("/confirmation", (req, res) => {
     { new: true }
   ).then(
     user =>
-      user ? res.json({ user: user.toAuthJSON() }) : res.status(400).json({})
+      user ? res.json({ user: user.toAuthJSON }) : res.status(400).json({})
   );
 });
 
