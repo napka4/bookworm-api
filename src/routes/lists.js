@@ -12,12 +12,15 @@ router.get("/", (req, res) => {
     const results = lists.map(list => {
       const findBooks = BooksOnList.find({ listId: list._id });
       let books = [];
-      findBooks.map(book => books.push(book));
+      findBooks.map(book => {
+        Book.find({ _id: book._id }).then(books => books.push(book));
+      });
       list._doc.books = books;
       return list;
     })
     return res.json({ lists: results })
-  } );
+  })
+  .catch(err => res.status(400).json({ errors: parseErrors(err.errors) }));
 });
 
 router.post("/", (req, res) => {
@@ -35,13 +38,10 @@ router.put("/", (req, res) =>
 
 router.put("/books", (req, res) => 
 {
-  List.findOne({ _id: req.body._id }).then(list => {
-    BooksOnList.findOneAndUpdate({ listId: list._id }, {$set:{ title: req.body.title }});
-  });
-  BooksOnList.findOne({ listId: list._id });
-  List.findOneAndUpdate({ _id: req.body._id }, {$set:{ title: req.body.title }}, {new: true})
-    .then(list => res.json({list}))
-    .catch(err => res.status(400).json({ errors: parseErrors(err.errors) }));
+  List.findOne({ _id: req.body._id }).then((list, book) => {
+    BooksOnList.findOneAndUpdate({ listId: list._id, bookId: book._id }, {$set:{ title: req.body.title }});
+  })
+  .catch(err => res.status(400).json({ errors: parseErrors(err.errors) }));
 });
 
 router.delete("/", (req, res) => {
