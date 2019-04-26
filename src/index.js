@@ -9,6 +9,7 @@ import auth from "./routes/auth";
 import users from "./routes/users";
 import books from "./routes/books";
 import lists from "./routes/lists";
+import booksOnList from "./routes/booksOnList";
 
 dotenv.config();
 const app = express();
@@ -20,6 +21,7 @@ app.use("/api/auth", auth);
 app.use("/api/users", users);
 app.use("/api/books", books);
 app.use("/api/lists", lists);
+app.use("/api/books-on-list", booksOnList);
 
 app.get("/*", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));

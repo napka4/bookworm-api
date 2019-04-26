@@ -9,27 +9,41 @@ const router = express.Router();
 router.use(authenticate);
 
 router.get("/", (req, res) => {
-  Book.find({ userId: req.currentUser._id }).then(books => res.json({ books }));
+  Book
+    .find({ userId: req.currentUser._id })
+    .then(books => res.json({ books }))
+    .catch(err => res.status(400).json({ errors: parseErrors(err.errors) }));
 });
 
 router.post("/", (req, res) => {
-  Book.create({ ...req.body.book, userId: req.currentUser._id })
+  const query = { 
+    ...req.body.book, 
+    userId: req.currentUser._id
+  };
+
+  Book
+    .create(query)
     .then(book => res.json({ book }))
     .catch(err => res.status(400).json({ errors: parseErrors(err.errors) }));
 });
 
 router.delete("/", (req, res) => {
-  Book.deleteOne({...req.body.book, userId: req.currentUser._id })
-  .then(book => res.json({book}) )
+  const query = {
+    ...req.body.book, 
+    userId: req.currentUser._id
+  };
+
+  Book
+    .deleteOne(query)
+    .then(book => res.json({ book }) )
     .catch(err => res.status(400).json({ errors: parseErrors(err.errors) }));
 });
 
 router.get("/search", (req, res) => {
+  const goodreadsUrl = 'https://www.goodreads.com/search/index.xml';
+
   request
-    .get(
-      `https://www.goodreads.com/search/index.xml?key=${process.env
-        .GOODREADS_KEY}&q=${req.query.q}`
-    )
+    .get(`${goodreadsUrl}?key=${process.env.GOODREADS_KEY}&q=${req.query.q}`)
     .then(result =>
       parseString(result, (err, goodreadsResult) =>
         res.json({
@@ -48,19 +62,16 @@ router.get("/search", (req, res) => {
 
 router.get("/fetchPages", (req, res) => {
   const goodreadsId = req.query.goodreadsId;
+  const goodreadsUrl = 'https://www.goodreads.com/book/show.xml';
 
   request
-    .get(
-      `https://www.goodreads.com/book/show.xml?key=${process.env
-        .GOODREADS_KEY}&id=${goodreadsId}`
-    )
+    .get(`${goodreadsUrl}?key=${process.env.GOODREADS_KEY}&id=${goodreadsId}`)
     .then(result =>
       parseString(result, (err, goodreadsResult) => {
         const numPages = goodreadsResult.GoodreadsResponse.book[0].num_pages[0];
         const pages = numPages ? parseInt(numPages, 10) : 0;
-        res.json({
-          pages
-        });
+
+        res.json({ pages });
       })
     );
 });
