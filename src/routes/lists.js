@@ -2,12 +2,22 @@ import express from "express";
 import authenticate from "../middlewares/authenticate";
 import List from "../models/List";
 import parseErrors from "../utils/parseErrors";
+import BooksOnList from "../models/BooksOnList";
 
 const router = express.Router();
 router.use(authenticate);
 
 router.get("/", (req, res) => {
-  List.find({ userId: req.currentUser._id }).then(lists => res.json({ lists }));
+  List.find({ userId: req.currentUser._id }).then(lists => {
+    const results = lists.map(list => {
+      const findBooks = BooksOnList.find({ listId: list._id });
+      let books = [];
+      findBooks.map(book => books.push(book));
+      list._doc.books = books;
+      return list;
+    })
+    return res.json({ lists: results })
+  } );
 });
 
 router.post("/", (req, res) => {
@@ -18,6 +28,17 @@ router.post("/", (req, res) => {
 
 router.put("/", (req, res) => 
 {
+  List.findOneAndUpdate({ _id: req.body._id }, {$set:{ title: req.body.title }}, {new: true})
+    .then(list => res.json({list}))
+    .catch(err => res.status(400).json({ errors: parseErrors(err.errors) }));
+});
+
+router.put("/books", (req, res) => 
+{
+  List.findOne({ _id: req.body._id }).then(list => {
+    BooksOnList.findOneAndUpdate({ listId: list._id }, {$set:{ title: req.body.title }});
+  });
+  BooksOnList.findOne({ listId: list._id });
   List.findOneAndUpdate({ _id: req.body._id }, {$set:{ title: req.body.title }}, {new: true})
     .then(list => res.json({list}))
     .catch(err => res.status(400).json({ errors: parseErrors(err.errors) }));
