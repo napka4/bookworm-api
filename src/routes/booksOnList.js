@@ -9,26 +9,27 @@ const router = express.Router();
 router.use(authenticate);
 
 router.get("/", (req, res) => {
-  List.find({ userId: req.currentUser._id }).then(lists => {
-    const results = lists.map(list => {
-      const findBooks = BooksOnList.find({ listId: list._id });
+  List
+    .findOne({ ...req.body.list })
+    .then(async list => {
+      const listId = list._id;
+      const booksOnList = await BooksOnList.find({ listId }).exec();
       const books = [];
 
-      findBooks.map(book => Book.find({ _id: book._id }).then(() => books.push(book)));
-      list._doc.books = books;
-      
-      return list;
-    });
+      for(let index = 0; index < booksOnList.length; index++) {
+        const book = await Book.findOne({ _id: booksOnList[index].bookId }).exec();
+        books.push(book);
+      }
 
-    return res.json({ lists: results });
-  })
-  .catch(err => res.status(400).json({ errors: parseErrors(err.errors) }));
+      return res.json({ books });
+    })
+    .catch(err => res.status(400).json({ errors: parseErrors(err.errors) }));
 });
 
 router.post("/", (req, res) => {
   const query = {
-    listId: req.body.list._id,
-    bookId: req.body.book._id
+    listId: req.body.list.list._id,
+    bookId: req.body.list.book._id
   };
   
   BooksOnList

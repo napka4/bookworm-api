@@ -3,6 +3,8 @@ import request from "request-promise";
 import { parseString } from "xml2js";
 import authenticate from "../middlewares/authenticate";
 import List from "../models/List";
+import Book from "../models/Book";
+import BooksOnList from "../models/BooksOnList";
 import parseErrors from "../utils/parseErrors";
 
 const router = express.Router();
@@ -12,6 +14,31 @@ router.get("/", (req, res) => {
   List
     .find({ userId: req.currentUser._id })
     .then(lists => res.json({ lists }))
+    .catch(err => res.status(400).json({ errors: parseErrors(err.errors) }));
+});
+
+router.get("/with-books", (req, res) => {
+  List
+    .find({ userId: req.currentUser._id })
+    .then(async lists => {
+      const newLists = [];
+
+      for(let listIndex = 0; listIndex < lists.length; listIndex++) {
+        const listId = lists[listIndex]._id;
+        const booksOnList = await BooksOnList.find({ listId }).exec();
+        const books = [];
+  
+        for(let bookIndex = 0; bookIndex < booksOnList.length; bookIndex++) {
+          const book = await Book.findOne({ _id: booksOnList[bookIndex].bookId }).exec();
+          books.push(book);
+        }
+
+        lists[listIndex]._doc.books = books;
+        newLists.push(lists[listIndex]);
+      }
+
+      return res.json({ lists: newLists });
+    })
     .catch(err => res.status(400).json({ errors: parseErrors(err.errors) }));
 });
 
